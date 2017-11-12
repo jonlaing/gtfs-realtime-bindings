@@ -1,47 +1,60 @@
-# gtfs-realtime-bindings
+**NOTE:** This repo was forked and modified because neither the npm or yarn registries
+had the latest dependencies, which was causing an issue with React Native.
 
-Language bindings generated from the
-[GTFS-realtime](https://developers.google.com/transit/gtfs-realtime/) protocol
-buffer spec for popular languages.
+# JavaScript GTFS-realtime Language Bindings
 
-## Introduction
+[![npm version](https://badge.fury.io/js/gtfs-realtime-bindings.svg)](http://badge.fury.io/js/gtfs-realtime-bindings)
 
-[GTFS-realtime](https://developers.google.com/transit/gtfs-realtime/) is a data
-format for communicating real-time information about public transit systems.
-GTFS-realtime data is encoded and decoded using [Protocol
-Buffers](https://developers.google.com/protocol-buffers/), a compact binary
-representation designed for fast and efficient processing.  The data schema
-itself is defined in
-[gtfs-realtime.proto](https://developers.google.com/transit/gtfs-realtime/gtfs-realtime-proto).
+Provides JavaScript classes generated from the
+[GTFS-realtime](https://developers.google.com/transit/gtfs-realtime/) Protocol
+Buffer specification.  These classes will allow you to parse a binary Protocol
+Buffer GTFS-realtime data feed into JavaScript objects.
 
-To work with GTFS-realtime data, a developer would typically use the
-`gtfs-realtime.proto` schema to generate classes in the programming language of
-their choice.  These classes can then be used for constructing GTFS-realtime
-data model objects and serializing them as binary data or, in the reverse
-direction, parsing binary data into data model objects.
+These bindings are designed to be used in the [Node.js](http://nodejs.org/)
+environment, but with some effort, they can probably be used in other
+JavaScript environments as well.
 
-Because generating GTFS-realtime data model classes from the
-`gtfs-realtime.proto` schema is such a common task, but also one that sometimes
-causes confusion for first-time developers, this project aims to provide
-pre-generated GTFS-realtime language bindings for a number of the most popular
-programming languages.  Where possible, these language bindings will be
-published as packages to facilitate their use in other projects.
+We use the [ProtBuf.js](https://github.com/dcodeIO/ProtoBuf.js) library for
+JavaScript Protocol Buffer support.
 
-## Supported Languages
+## Add the Dependency
 
-* [.NET](dotnet/README.md)
-* [Java](java/README.md)
-* [JavaScript / Node.js](nodejs/README.md)
-* [PHP](https://github.com/google/gtfs-realtime-bindings-php)
-* [Python](python/README.md)
-* [Ruby](ruby/README.md)
-* [Golang](golang/README.md)
+To use the `gtfs-realtime-bindings` classes in your own project, you need to
+first install our [Node.js npm package](https://www.npmjs.com/package/gtfs-realtime-bindings):
 
-## Other Languages
+```
+npm install gtfs-realtime-bindings
+```
 
-We don't provide generated code for C++, use the official protoc compiler for that (from [here](https://developers.google.com/protocol-buffers/docs/downloads) or [here](https://github.com/google/protobuf))
+## Example Code
 
-Are we missing your favorite language? Consider contributing:
+The following Node.js code snippet demonstrates downloading a GTFS-realtime
+data feed from a particular URL, parsing it as a FeedMessage (the root type of
+the GTFS-realtime schema), and iterating over the results.
 
-1. Read [CONTRIBUTING.md](CONTRIBUTING.md).
-2. Open a pull request with your language of choice. Please include update instructions (ideally, scripts). Also, provide packaging suitable for the language ecosystem.
+```javascript
+var GtfsRealtimeBindings = require('gtfs-realtime-bindings');
+var request = require('request');
+
+var requestSettings = {
+  method: 'GET',
+  url: 'URL OF YOUR GTFS-REALTIME SOURCE GOES HERE',
+  encoding: null
+};
+request(requestSettings, function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    var feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(body);
+    feed.entity.forEach(function(entity) {
+      if (entity.trip_update) {
+        console.log(entity.trip_update);
+      }
+    });
+  }
+});
+```
+
+For more details on the naming conventions for the Javascript classes generated
+from the
+[gtfs-realtime.proto](https://developers.google.com/transit/gtfs-realtime/gtfs-realtime-proto),
+check out the [ProtoBuf.js project](https://github.com/dcodeIO/ProtoBuf.js/wiki)
+which we use to handle our Protocol Buffer serialization.
